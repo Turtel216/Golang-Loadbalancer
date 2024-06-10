@@ -94,7 +94,7 @@ func main() {
   servers := []Server {
     newSimpleServer("https://www.google.com"),
     newSimpleServer("https://www.youtube.com"),
-    newSimpleServer("https://www.go.dev"),
+    newSimpleServer("https://www.facebook.com"),
   }
 
   // Creates a new loadbalancer at port 8000
