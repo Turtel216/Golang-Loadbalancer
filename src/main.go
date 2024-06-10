@@ -8,15 +8,15 @@ import (
 	"os"
 )
 
-type simpleServer struct {
-  addr string 
-  proxy *httputil.ReverseProxy
-}
-
 type Server interface {
   Address() string 
   IsAlive() bool 
   Serve(rw http.ResponseWriter,r *http.Request)
+}
+
+type simpleServer struct {
+  addr string 
+  proxy *httputil.ReverseProxy
 }
 
 type Loadbalancer struct {
@@ -54,9 +54,14 @@ func (server *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
   server.proxy.ServeHTTP(rw, req)
 }
 
-func getNextAvailableServer(loadbalancer *LoadLoadbalancer) Server {}
+func (loadbalancer *LoadLoadbalancer) getNextAvailableServer() Server {}
 
-func (loadbalancer *Loadbalancer) serveProxy(rw http.ResponseWriter, r *http.Request) {}
+func (loadbalancer *Loadbalancer) serveProxy(rw http.ResponseWriter, req *http.Request) {
+  target := loadbalancer.getNextAvailableServer()
+  fmt.Printf("Forwarding request to adress %q\n", target.Adress)
+  
+  target.Serve(rw, req)
+}
 
 func main() {
   servers := []Server {
