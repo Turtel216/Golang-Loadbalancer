@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
@@ -82,6 +83,13 @@ func (loadbalancer *Loadbalancer) serveProxy(rw http.ResponseWriter, req *http.R
 }
 
 func main() {
+
+  // Command line flag to specify port number when running go run ./src/main.go
+  // Default value is :4000
+  port := flag.String("port", "4000", "network port")
+
+  flag.Parse()
+
   // Target servers
   servers := []Server {
     newSimpleServer("https://www.google.com"),
@@ -90,7 +98,7 @@ func main() {
   }
 
   // Creates a new loadbalancer at port 8000
-  loadbalancer := NewLoadBalancer("8000", servers)
+  loadbalancer := NewLoadBalancer(*port, servers)
 
   handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
     loadbalancer.serveProxy(rw, req)
