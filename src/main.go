@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
@@ -10,6 +11,18 @@ import (
 type simpleServer struct {
   addr string 
   proxy *httputil.ReverseProxy
+}
+
+type Server interface {
+  Address() string 
+  IsAlive() bool 
+  Serve(rw http.ResponseWriter,r *http.Request)
+}
+
+type Loadbalancer struct {
+  port string
+  roundRobinCount int
+  servers []Server
 }
 
 func newSimpleServer(addr string) *simpleServer{
