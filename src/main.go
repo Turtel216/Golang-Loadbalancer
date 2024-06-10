@@ -54,7 +54,17 @@ func (server *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
   server.proxy.ServeHTTP(rw, req)
 }
 
-func (loadbalancer *LoadLoadbalancer) getNextAvailableServer() Server {}
+func (loadbalancer *Loadbalancer) getNextAvailableServer() Server {
+  server := loadbalancer.servers[loadbalancer.roundRobinCount%len(loadbalancer.servers)]
+
+  for !server.IsAlive() {
+    loadbalancer.roundRobinCount++
+    server = loadbalancer.servers[loadbalancer.roundRobinCount%len(loadbalancer.servers)]
+  }
+
+  loadbalancer.roundRobinCount++
+  return server
+}
 
 func (loadbalancer *Loadbalancer) serveProxy(rw http.ResponseWriter, req *http.Request) {
   target := loadbalancer.getNextAvailableServer()
