@@ -20,6 +20,7 @@ type simpleServer struct {
   proxy *httputil.ReverseProxy
 }
 
+// Creates and returns a new instance of the simpleServer struct
 func newSimpleServer(addr string) *simpleServer{
   serverUrl, err := url.Parse(addr)
   if err != nil {
@@ -36,9 +37,10 @@ func newSimpleServer(addr string) *simpleServer{
 type Loadbalancer struct {
   port string
   roundRobinCount int
-  servers []Server
+  servers []Server //Interface
 }
 
+//Creates and returns a new loadbalancer instance
 func NewLoadBalancer(port string, servers [] Server) *Loadbalancer {
   return &Loadbalancer {
     port: port,
@@ -47,14 +49,18 @@ func NewLoadBalancer(port string, servers [] Server) *Loadbalancer {
   }
 }
 
+// Returns the adress of the simple server instance
 func (s *simpleServer) Address() string {return s.addr}
 
+// Ensures that the simpleServer instsance is running
 func (s *simpleServer) IsAlive() bool { return true}
 
+// Serves the through the reverse proxy
 func (s *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
   s.proxy.ServeHTTP(rw, req)
 }
 
+// returns the server selected by the round-robin scheduler
 func (loadbalancer *Loadbalancer) getNextAvailableServer() Server {
   server := loadbalancer.servers[loadbalancer.roundRobinCount%len(loadbalancer.servers)]
 
@@ -67,27 +73,33 @@ func (loadbalancer *Loadbalancer) getNextAvailableServer() Server {
   return server
 }
 
+// Forwards the request to the server returned by the getNextAvailableServer method
 func (loadbalancer *Loadbalancer) serveProxy(rw http.ResponseWriter, req *http.Request) {
   target := loadbalancer.getNextAvailableServer()
-  fmt.Printf("Forwarding request to adress %q\n", target.Address)
+  fmt.Printf("Forwarding request to adress %q\n", target.Address())
   
   target.Serve(rw, req)
 }
 
 func main() {
+  // Target servers
   servers := []Server {
     newSimpleServer("https://www.google.com"),
     newSimpleServer("https://www.youtube.com"),
     newSimpleServer("https://www.go.dev"),
   }
 
+  // Creates a new loadbalancer at port 8000
   loadbalancer := NewLoadBalancer("8000", servers)
 
   handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
     loadbalancer.serveProxy(rw, req)
   }
+
+  //Retoutes request coming in at the `/` endpoint
   http.HandleFunc("/", handleRedirect)
 
+  // Starting the server
   fmt.Printf("Loadbalancer started at port %s \n", loadbalancer.port)
   http.ListenAndServe(":" + loadbalancer.port, nil)
 }
