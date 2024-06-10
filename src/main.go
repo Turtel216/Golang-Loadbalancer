@@ -8,15 +8,29 @@ import (
 	"os"
 )
 
+
 type Server interface {
   Address() string 
   IsAlive() bool 
-  Serve(rw http.ResponseWriter,r *http.Request)
+  Serve(rw http.ResponseWriter, req *http.Request)
 }
 
 type simpleServer struct {
   addr string 
   proxy *httputil.ReverseProxy
+}
+
+func newSimpleServer(addr string) *simpleServer{
+  serverUrl, err := url.Parse(addr)
+  if err != nil {
+    fmt.Printf("error: %v\n", err)
+    os.Exit(1)
+  }
+
+  return &simpleServer{
+    addr: addr,
+    proxy: httputil.NewSingleHostReverseProxy(serverUrl),
+  }
 }
 
 type Loadbalancer struct {
@@ -33,25 +47,12 @@ func NewLoadBalancer(port string, servers [] Server) *Loadbalancer {
   }
 }
 
-func newSimpleServer(addr string) *simpleServer{
-  serverUrl, err := url.Parse(addr)
-  if err != nil {
-    fmt.Printf("error: %v\n", err)
-    os.Exit(1)
-  }
+func (s *simpleServer) Address() string {return s.addr}
 
-  return &simpleServer{
-    addr: addr,
-    proxy: httputil.NewSingleHostReverseProxy(serverUrl),
-  }
-}
+func (s *simpleServer) IsAlive() bool { return true}
 
-func (server *simpleServer) Adress() string {return server.addr}
-
-func (server *simpleServer) IsAlive() bool { return true}
-
-func (server *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
-  server.proxy.ServeHTTP(rw, req)
+func (s *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
+  s.proxy.ServeHTTP(rw, req)
 }
 
 func (loadbalancer *Loadbalancer) getNextAvailableServer() Server {
@@ -68,7 +69,7 @@ func (loadbalancer *Loadbalancer) getNextAvailableServer() Server {
 
 func (loadbalancer *Loadbalancer) serveProxy(rw http.ResponseWriter, req *http.Request) {
   target := loadbalancer.getNextAvailableServer()
-  fmt.Printf("Forwarding request to adress %q\n", target.Adress)
+  fmt.Printf("Forwarding request to adress %q\n", target.Address)
   
   target.Serve(rw, req)
 }
