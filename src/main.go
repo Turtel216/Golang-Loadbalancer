@@ -62,8 +62,8 @@ func (s *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
 }
 
 // returns the server selected by the round-robin scheduler
-func (loadbalancer *Loadbalancer) getNextAvailableServer() Server {
-  server := loadbalancer.servers[loadbalancer.roundRobinCount%len(loadbalancer.servers)]
+func (loadbalancer *Loadbalancer) getNextAvailableServer() (server Server) {
+  server = loadbalancer.servers[loadbalancer.roundRobinCount%len(loadbalancer.servers)]
 
   for !server.IsAlive() {
     loadbalancer.roundRobinCount++
@@ -71,7 +71,7 @@ func (loadbalancer *Loadbalancer) getNextAvailableServer() Server {
   }
 
   loadbalancer.roundRobinCount++
-  return server
+  return
 }
 
 // Forwards the request to the server returned by the getNextAvailableServer method
