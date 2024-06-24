@@ -39,7 +39,7 @@ func newSimpleServer(addr string, weight float32) *simpleServer {
 type Loadbalancer struct {
 	port            string
 	roundRobinCount int
-	servers         []Server //Interface
+	server_queue    []Server //Interface
 }
 
 // Creates and returns a new loadbalancer instance
@@ -47,7 +47,7 @@ func NewLoadBalancer(port string, servers []Server) *Loadbalancer {
 	return &Loadbalancer{
 		port:            port,
 		roundRobinCount: 0,
-		servers:         servers,
+		server_queue:    servers,
 	}
 }
 
@@ -62,7 +62,7 @@ func (s *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
 	s.proxy.ServeHTTP(rw, req)
 }
 
-// returns the server selected by the round-robin scheduler
+// returns the server selected by the weighted round-robin scheduler
 func (loadbalancer *Loadbalancer) getNextAvailableServer() (server Server) {
 	server = loadbalancer.servers[loadbalancer.roundRobinCount%len(loadbalancer.servers)]
 
@@ -92,14 +92,14 @@ func main() {
 	flag.Parse()
 
 	// Target servers
-	servers := []Server{
+	server_queue := []Server{
 		newSimpleServer("https://www.google.com", 0.3),
 		newSimpleServer("https://www.youtube.com", 0.2),
 		newSimpleServer("https://www.facebook.com", 0.1),
 	}
 
 	// Creates a new loadbalancer at port 8000
-	loadbalancer := NewLoadBalancer(*port, servers)
+	loadbalancer := NewLoadBalancer(*port, server_queue)
 
 	handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
 		loadbalancer.serveProxy(rw, req)
