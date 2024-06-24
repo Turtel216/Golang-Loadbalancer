@@ -17,12 +17,12 @@ type Server interface {
 
 type simpleServer struct {
 	addr   string
-	weight float32
+	weight int
 	proxy  *httputil.ReverseProxy
 }
 
 // Creates and returns a new instance of the simpleServer struct
-func newSimpleServer(addr string, weight float32) *simpleServer {
+func newSimpleServer(addr string, weight int) *simpleServer {
 	serverUrl, err := url.Parse(addr)
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
@@ -39,15 +39,18 @@ func newSimpleServer(addr string, weight float32) *simpleServer {
 type Loadbalancer struct {
 	port            string
 	roundRobinCount int
-	server_queue    []Server //Interface
+	servers         []Server //Interface
+	total_weights   int
 }
 
 // Creates and returns a new loadbalancer instance
-func NewLoadBalancer(port string, servers []Server) *Loadbalancer {
+func NewLoadBalancer(port string, servers []Server, total_weights int) *Loadbalancer {
+
 	return &Loadbalancer{
 		port:            port,
 		roundRobinCount: 0,
-		server_queue:    servers,
+		servers:         servers,
+		total_weights:   total_weights,
 	}
 }
 
@@ -92,14 +95,14 @@ func main() {
 	flag.Parse()
 
 	// Target servers
-	server_queue := []Server{
-		newSimpleServer("https://www.google.com", 0.3),
-		newSimpleServer("https://www.youtube.com", 0.2),
-		newSimpleServer("https://www.facebook.com", 0.1),
+	servers := []Server{
+		newSimpleServer("https://www.google.com", 3),
+		newSimpleServer("https://www.youtube.com", 2),
+		newSimpleServer("https://www.facebook.com", 1),
 	}
 
 	// Creates a new loadbalancer at port 8000
-	loadbalancer := NewLoadBalancer(*port, server_queue)
+	loadbalancer := NewLoadBalancer(*port, servers, 6)
 
 	handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
 		loadbalancer.serveProxy(rw, req)
