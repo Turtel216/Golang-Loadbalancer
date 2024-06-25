@@ -13,7 +13,6 @@ import (
 
 type Server interface {
 	Address() string
-	IsAlive() bool
 	Serve(rw http.ResponseWriter, req *http.Request)
 }
 
@@ -64,9 +63,6 @@ func NewLoadBalancer(port string, servers []simpleServer, total_weights int) *Lo
 
 // Returns the adress of the simple server instance
 func (s *simpleServer) Address() string { return s.addr }
-
-// Ensures that the simpleServer instsance is running
-func (s *simpleServer) IsAlive() bool { return true }
 
 // Serves the through the reverse proxy
 func (s *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
