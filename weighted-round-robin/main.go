@@ -4,11 +4,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"sync"
 )
 
 type Server interface {
@@ -38,20 +40,19 @@ func newSimpleServer(addr string, weight int) simpleServer {
 }
 
 type Loadbalancer struct {
-	port            string
-	roundRobinCount int
-	servers         []simpleServer
-	current         int
-	total_weights   int
+	port          string
+	mu            sync.Mutex
+	servers       []simpleServer
+	current       int
+	total_weights int
 }
 
 // Creates and returns a new loadbalancer instance
 func NewLoadBalancer(port string, servers []simpleServer, total_weights int) *Loadbalancer {
 	loadbalancer := &Loadbalancer{
-		port:            port,
-		roundRobinCount: 0,
-		servers:         servers,
-		total_weights:   total_weights,
+		port:          port,
+		servers:       servers,
+		total_weights: total_weights,
 	}
 
 	for _, server := range servers {
@@ -71,6 +72,9 @@ func (s *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
 
 // returns the server selected by the weighted round-robin scheduler
 func (loadbalancer *Loadbalancer) getNextAvailableServer() (simpleServer, error) {
+	loadbalancer.mu.Lock()
+	defer loadbalancer.mu.Unlock()
+
 	if loadbalancer.current == -1 {
 		loadbalancer.current = rand.Intn(loadbalancer.total_weights)
 	}
@@ -92,7 +96,7 @@ func (loadbalancer *Loadbalancer) getNextAvailableServer() (simpleServer, error)
 func (loadbalancer *Loadbalancer) serveProxy(rw http.ResponseWriter, req *http.Request) {
 	target, err := loadbalancer.getNextAvailableServer()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	fmt.Printf("Forwarding request to adress %q\n", target.Address())
 
