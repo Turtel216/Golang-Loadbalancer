@@ -7,6 +7,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"sync"
 )
 
 type Server interface {
@@ -37,7 +38,9 @@ func newSimpleServer(addr string) *simpleServer {
 type Loadbalancer struct {
 	port            string
 	roundRobinCount int
-	servers         []Server //Interface
+
+	mu      sync.Mutex
+	servers []Server //Interface
 }
 
 // Creates and returns a new loadbalancer instance
@@ -62,6 +65,9 @@ func (s *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
 
 // returns the server selected by the round-robin scheduler
 func (loadbalancer *Loadbalancer) getNextAvailableServer() (server Server) {
+	loadbalancer.mu.Lock()
+	defer loadbalancer.mu.Unlock()
+
 	server = loadbalancer.servers[loadbalancer.roundRobinCount%len(loadbalancer.servers)]
 
 	for !server.IsAlive() {
