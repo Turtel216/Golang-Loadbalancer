@@ -6,6 +6,7 @@
 
 - Round-Robin
 - Weighted Round-Robin
+- Source ip hash (currently being worked on)
 - **More to be added soon!**
 
 ## Running the server
