@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+
+	round_robin "github.com/Turtel216/Golang-Loadbalancer/round-robin"
 )
 
 func main() {
@@ -15,22 +17,23 @@ func main() {
 	flag.Parse()
 
 	// Target servers
-	servers := []Server{
-		newSimpleServer("https://www.youtube.com"),
-		newSimpleServer("https://www.facebook.com"),
+	servers := []round_robin.Server{
+		round_robin.NewSimpleServer("https://www.youtube.com"),
+		round_robin.NewSimpleServer("https://www.facebook.com"),
+		round_robin.NewSimpleServer("https://www.google.com"),
 	}
 
 	// Creates a new loadbalancer at port 8000
-	loadbalancer := NewLoadBalancer(*port, servers)
+	loadbalancer := round_robin.NewLoadBalancer(*port, servers)
 
 	handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
-		loadbalancer.serveProxy(rw, req)
+		loadbalancer.ServeProxy(rw, req)
 	}
 
 	//Reroutes request coming in at the `/` endpoint
 	http.HandleFunc("/", handleRedirect)
 
 	// Starting the server
-	fmt.Printf("Loadbalancer started at port %s \n", loadbalancer.port)
-	http.ListenAndServe(":"+loadbalancer.port, nil)
+	fmt.Printf("Loadbalancer started at port %s \n", loadbalancer.Port)
+	http.ListenAndServe(":"+loadbalancer.Port, nil)
 }

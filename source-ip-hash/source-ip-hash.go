@@ -1,4 +1,4 @@
-package main
+package source_ip_hash
 
 import (
 	"fmt"
@@ -22,7 +22,7 @@ type simpleServer struct {
 }
 
 // Creates a new instance of the simpleServer struct
-func newSimpleServer(addr string) simpleServer {
+func NewSimpleServer(addr string) simpleServer {
 	serverUrl, err := url.Parse(addr)
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
@@ -36,7 +36,7 @@ func newSimpleServer(addr string) simpleServer {
 }
 
 type Loadbalancer struct {
-	port    string
+	Port    string
 	mu      sync.Mutex
 	servers []simpleServer
 }
@@ -44,7 +44,7 @@ type Loadbalancer struct {
 // Creates and returns a new loadbalancer instance
 func NewLoadBalancer(port string, servers []simpleServer) *Loadbalancer {
 	loadbalancer := &Loadbalancer{
-		port:    port,
+		Port:    port,
 		servers: servers,
 	}
 
@@ -82,7 +82,7 @@ func hash(str string) uint32 {
 }
 
 // Forwards the request to the server returned by the getNextAvailableServer method
-func (loadbalancer *Loadbalancer) serveProxy(rw http.ResponseWriter, req *http.Request) {
+func (loadbalancer *Loadbalancer) ServeProxy(rw http.ResponseWriter, req *http.Request) {
 	target, err := loadbalancer.getNextAvailableServer(req)
 	if err != nil {
 		log.Fatal(err)

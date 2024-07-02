@@ -21,7 +21,7 @@ type simpleServer struct {
 }
 
 // Creates and returns a new instance of the simpleServer struct
-func newSimpleServer(addr string) *simpleServer {
+func NewSimpleServer(addr string) *simpleServer {
 	serverUrl, err := url.Parse(addr)
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
@@ -35,7 +35,7 @@ func newSimpleServer(addr string) *simpleServer {
 }
 
 type Loadbalancer struct {
-	port            string
+	Port            string
 	roundRobinCount int
 
 	mu      sync.Mutex
@@ -45,7 +45,7 @@ type Loadbalancer struct {
 // Creates a new loadbalancer instance
 func NewLoadBalancer(port string, servers []Server) *Loadbalancer {
 	return &Loadbalancer{
-		port:            port,
+		Port:            port,
 		roundRobinCount: 0,
 		servers:         servers,
 	}
@@ -79,7 +79,7 @@ func (loadbalancer *Loadbalancer) getNextAvailableServer() (server Server) {
 }
 
 // Forwards the request to the server returned by the getNextAvailableServer method
-func (loadbalancer *Loadbalancer) serveProxy(rw http.ResponseWriter, req *http.Request) {
+func (loadbalancer *Loadbalancer) ServeProxy(rw http.ResponseWriter, req *http.Request) {
 	target := loadbalancer.getNextAvailableServer()
 	fmt.Printf("Forwarding request to adress %q\n", target.Address())
 

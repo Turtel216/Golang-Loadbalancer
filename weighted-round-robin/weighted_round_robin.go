@@ -1,4 +1,4 @@
-package main
+package weighted_round_robin
 
 import (
 	"errors"
@@ -24,7 +24,7 @@ type simpleServer struct {
 }
 
 // Creates a new instance of the simpleServer struct
-func newSimpleServer(addr string, weight int) simpleServer {
+func NewSimpleServer(addr string, weight int) simpleServer {
 	serverUrl, err := url.Parse(addr)
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
@@ -39,7 +39,7 @@ func newSimpleServer(addr string, weight int) simpleServer {
 }
 
 type Loadbalancer struct {
-	port          string
+	Port          string
 	mu            sync.Mutex
 	servers       []simpleServer
 	current       int
@@ -49,7 +49,7 @@ type Loadbalancer struct {
 // Creates and returns a new loadbalancer instance
 func NewLoadBalancer(port string, servers []simpleServer, total_weights int) *Loadbalancer {
 	loadbalancer := &Loadbalancer{
-		port:          port,
+		Port:          port,
 		servers:       servers,
 		total_weights: total_weights,
 	}
@@ -92,7 +92,7 @@ func (loadbalancer *Loadbalancer) getNextAvailableServer() (simpleServer, error)
 }
 
 // Forwards the request to the server returned by the getNextAvailableServer method
-func (loadbalancer *Loadbalancer) serveProxy(rw http.ResponseWriter, req *http.Request) {
+func (loadbalancer *Loadbalancer) ServeProxy(rw http.ResponseWriter, req *http.Request) {
 	target, err := loadbalancer.getNextAvailableServer()
 	if err != nil {
 		log.Fatal(err)
