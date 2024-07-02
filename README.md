@@ -13,12 +13,12 @@
 
 The server can be started by running the following command
 
-    go run ./src/main.go 
+    go run ./cmd/main.go 
 
 This will start the server at the default port 4000. You can add the -port flag to specify the port numebr
 
 i.g.
 
-    go run ./src/main.go -port=3000
+    go run ./cmd/main.go -port=3000
 
 This will start the server at port 3000
