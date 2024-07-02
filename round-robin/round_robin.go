@@ -1,7 +1,6 @@
-package main
+package round_robin
 
 import (
-	"flag"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
@@ -43,7 +42,7 @@ type Loadbalancer struct {
 	servers []Server //Interface
 }
 
-// Creates and returns a new loadbalancer instance
+// Creates a new loadbalancer instance
 func NewLoadBalancer(port string, servers []Server) *Loadbalancer {
 	return &Loadbalancer{
 		port:            port,
@@ -85,34 +84,4 @@ func (loadbalancer *Loadbalancer) serveProxy(rw http.ResponseWriter, req *http.R
 	fmt.Printf("Forwarding request to adress %q\n", target.Address())
 
 	target.Serve(rw, req)
-}
-
-func main() {
-
-	// Command line flag to specify port number when running go run ./src/main.go
-	// Default value is :4000
-	port := flag.String("port", "4000", "network port")
-
-	flag.Parse()
-
-	// Target servers
-	servers := []Server{
-		newSimpleServer("https://www.google.com"),
-		newSimpleServer("https://www.youtube.com"),
-		newSimpleServer("https://www.facebook.com"),
-	}
-
-	// Creates a new loadbalancer at port 8000
-	loadbalancer := NewLoadBalancer(*port, servers)
-
-	handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
-		loadbalancer.serveProxy(rw, req)
-	}
-
-	//Retoutes request coming in at the `/` endpoint
-	http.HandleFunc("/", handleRedirect)
-
-	// Starting the server
-	fmt.Printf("Loadbalancer started at port %s \n", loadbalancer.port)
-	http.ListenAndServe(":"+loadbalancer.port, nil)
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"log"
 	"math/rand"
@@ -24,7 +23,7 @@ type simpleServer struct {
 	proxy  *httputil.ReverseProxy
 }
 
-// Creates and returns a new instance of the simpleServer struct
+// Creates a new instance of the simpleServer struct
 func newSimpleServer(addr string, weight int) simpleServer {
 	serverUrl, err := url.Parse(addr)
 	if err != nil {
@@ -101,34 +100,4 @@ func (loadbalancer *Loadbalancer) serveProxy(rw http.ResponseWriter, req *http.R
 	fmt.Printf("Forwarding request to adress %q\n", target.Address())
 
 	target.Serve(rw, req)
-}
-
-func main() {
-
-	// Command line flag to specify port number when running go run ./src/main.go
-	// Default value is :4000
-	port := flag.String("port", "4000", "network port")
-
-	flag.Parse()
-
-	// Target servers
-	servers := []simpleServer{
-		newSimpleServer("https://www.google.com", 3),
-		newSimpleServer("https://www.youtube.com", 2),
-		newSimpleServer("https://www.facebook.com", 1),
-	}
-
-	// Creates a new loadbalancer at port 8000
-	loadbalancer := NewLoadBalancer(*port, servers, 6)
-
-	handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
-		loadbalancer.serveProxy(rw, req)
-	}
-
-	//Retoutes request coming in at the `/` endpoint
-	http.HandleFunc("/", handleRedirect)
-
-	// Starting the server
-	fmt.Printf("Loadbalancer started at port %s \n", loadbalancer.port)
-	http.ListenAndServe(":"+loadbalancer.port, nil)
 }
