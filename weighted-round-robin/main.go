@@ -118,14 +118,14 @@ func main() {
 		newSimpleServer("https://www.facebook.com", 1),
 	}
 
-	// Creates a new loadbalancer at port 8000
+	// Create a new loadbalancer
 	loadbalancer := NewLoadBalancer(*port, servers, 6)
 
 	handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
 		loadbalancer.serveProxy(rw, req)
 	}
 
-	//Retoutes request coming in at the `/` endpoint
+	//Reroutes request coming in at the `/` endpoint
 	http.HandleFunc("/", handleRedirect)
 
 	// Starting the server
