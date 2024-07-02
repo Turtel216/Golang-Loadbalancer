@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"hash/fnv"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -42,7 +43,7 @@ type Loadbalancer struct {
 }
 
 // Creates and returns a new loadbalancer instance
-func NewLoadBalancer(port string, servers []simpleServer, total_weights int) *Loadbalancer {
+func NewLoadBalancer(port string, servers []simpleServer) *Loadbalancer {
 	loadbalancer := &Loadbalancer{
 		port:    port,
 		servers: servers,
@@ -59,14 +60,31 @@ func (s *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
 	s.proxy.ServeHTTP(rw, req)
 }
 
-// returns the server selected by the weighted round-robin scheduler
-func (loadbalancer *Loadbalancer) getNextAvailableServer() (simpleServer, error) {
-	//TODO
+// Returns the server selected by the source ip hash algorithm
+func (loadbalancer *Loadbalancer) getNextAvailableServer(req *http.Request) (simpleServer, error) {
+	// get the source ip
+	request_ip := req.Header.Get("X-Forwarded-For")
+
+	// calculate the hash of the source ip
+	ip_hash := hash(request_ip)
+
+	// Map the hash value to the server index
+	server_index := int(ip_hash) % len(loadbalancer.servers)
+
+	return loadbalancer.servers[server_index], nil
+}
+
+// Function to calculate the hash value of a given string
+func hash(str string) uint32 {
+	_hash := fnv.New32a()
+	_hash.Write([]byte(str))
+
+	return _hash.Sum32()
 }
 
 // Forwards the request to the server returned by the getNextAvailableServer method
 func (loadbalancer *Loadbalancer) serveProxy(rw http.ResponseWriter, req *http.Request) {
-	target, err := loadbalancer.getNextAvailableServer()
+	target, err := loadbalancer.getNextAvailableServer(req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -90,14 +108,14 @@ func main() {
 		newSimpleServer("https://www.facebook.com"),
 	}
 
-	// Creates a new loadbalancer at port 8000
-	loadbalancer := NewLoadBalancer(*port, servers, 6)
+	// Create a new loadbalancer
+	loadbalancer := NewLoadBalancer(*port, servers)
 
 	handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
 		loadbalancer.serveProxy(rw, req)
 	}
 
-	//Retoutes request coming in at the `/` endpoint
+	//Reroutes request coming in at the `/` endpoint
 	http.HandleFunc("/", handleRedirect)
 
 	// Starting the server
