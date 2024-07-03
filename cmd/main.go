@@ -8,6 +8,7 @@ import (
 	round_robin "github.com/Turtel216/Golang-Loadbalancer/round-robin"
 )
 
+// Tests the usages of a round-robin loadbalancer
 func main() {
 
 	// Command line flag to specify port number when running go run ./src/main.go

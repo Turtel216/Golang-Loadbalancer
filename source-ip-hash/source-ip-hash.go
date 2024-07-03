@@ -51,16 +51,10 @@ func NewLoadBalancer(port string, servers []simpleServer) *Loadbalancer {
 	return loadbalancer
 }
 
-// Returns the adress of the simple server instance
-func (s *simpleServer) Address() string { return s.addr }
-
-// Serves the through the reverse proxy
-func (s *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
-	s.proxy.ServeHTTP(rw, req)
-}
-
 // Returns the server selected by the source ip hash algorithm
 func (loadbalancer *Loadbalancer) getNextAvailableServer(req *http.Request) (simpleServer, error) {
+	loadbalancer.mu.Lock()
+	defer loadbalancer.mu.Unlock()
 	// get the source ip
 	request_ip := req.Header.Get("X-Forwarded-For")
 
@@ -71,6 +65,14 @@ func (loadbalancer *Loadbalancer) getNextAvailableServer(req *http.Request) (sim
 	server_index := int(ip_hash) % len(loadbalancer.servers)
 
 	return loadbalancer.servers[server_index], nil
+}
+
+// Returns the adress of the simple server instance
+func (s *simpleServer) Address() string { return s.addr }
+
+// Serves the through the reverse proxy
+func (s *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
+	s.proxy.ServeHTTP(rw, req)
 }
 
 // Function to calculate the hash value of a given string

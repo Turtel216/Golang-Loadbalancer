@@ -51,18 +51,7 @@ func NewLoadBalancer(port string, servers []Server) *Loadbalancer {
 	}
 }
 
-// Returns the adress of the simple server instance
-func (s *simpleServer) Address() string { return s.addr }
-
-// Ensures that the simpleServer instsance is running
-func (s *simpleServer) IsAlive() bool { return true }
-
-// Serves the through the reverse proxy
-func (s *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
-	s.proxy.ServeHTTP(rw, req)
-}
-
-// returns the server selected by the round-robin scheduler
+// Returns the server selected by the round-robin scheduler
 func (loadbalancer *Loadbalancer) getNextAvailableServer() (server Server) {
 	loadbalancer.mu.Lock()
 	defer loadbalancer.mu.Unlock()
@@ -76,6 +65,17 @@ func (loadbalancer *Loadbalancer) getNextAvailableServer() (server Server) {
 
 	loadbalancer.roundRobinCount++
 	return
+}
+
+// Returns the adress of the simple server instance
+func (s *simpleServer) Address() string { return s.addr }
+
+// Ensures that the simpleServer instsance is running
+func (s *simpleServer) IsAlive() bool { return true }
+
+// Serves the through the reverse proxy
+func (s *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
+	s.proxy.ServeHTTP(rw, req)
 }
 
 // Forwards the request to the server returned by the getNextAvailableServer method
