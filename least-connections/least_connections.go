@@ -36,7 +36,7 @@ func NewSimpleServer(addr string) *simpleServer {
 
 type Loadbalancer struct {
 	Port        string
-	Connections map[string]int
+	Connections map[Server]int
 
 	mu      sync.Mutex
 	servers []Server //Interface
@@ -46,15 +46,29 @@ type Loadbalancer struct {
 func NewLoadBalancer(port string, servers []Server) *Loadbalancer {
 	return &Loadbalancer{
 		Port:        port,
-		Connections: make(map[string]int),
+		Connections: make(map[Server]int),
 		servers:     servers,
 	}
 }
 
-// Returns the server selected by the round-robin scheduler
+// Returns the server with the least connections
 func (loadbalancer *Loadbalancer) getNextAvailableServer() (server Server) {
 	loadbalancer.mu.Lock()
 	defer loadbalancer.mu.Unlock()
+
+	// Find server with least connections
+	min_conn := 0
+
+	for connection := range loadbalancer.Connections {
+		if connection < min_conn {
+			min_conn = connection
+			server = connection[value]
+		}
+	}
+
+	if server != nil {
+		loadbalancer.Connections[server] = min_conn + 1
+	}
 
 	return
 }
