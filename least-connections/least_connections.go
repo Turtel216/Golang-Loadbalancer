@@ -59,10 +59,10 @@ func (loadbalancer *Loadbalancer) getNextAvailableServer() (server Server) {
 	// Find server with least connections
 	min_conn := 0
 
-	for connection := range loadbalancer.Connections {
-		if connection < min_conn {
-			min_conn = connection
-			server = connection[value]
+	for serv, num_conn := range loadbalancer.Connections {
+		if num_conn < min_conn {
+			min_conn = num_conn
+			server = serv
 		}
 	}
 
