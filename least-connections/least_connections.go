@@ -2,6 +2,7 @@ package least_connections
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -57,7 +58,7 @@ func (loadbalancer *Loadbalancer) getNextAvailableServer() (server Server) {
 	defer loadbalancer.mu.Unlock()
 
 	// Find server with least connections
-	min_conn := 0
+	min_conn := math.MaxInt64
 
 	for serv, num_conn := range loadbalancer.Connections {
 		if num_conn < min_conn {
