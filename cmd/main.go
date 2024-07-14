@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	ROUND_ROBIN          = string("rr")
-	WEIGHTED_ROUND_ROBIN = string("wrr")
-	LEAST_CONNECTIONS    = string("lc")
-	SOURCE_IP_HASH       = string("si")
-	LEAST_RESPONSE_TIME  = string("lrs")
+	ROUND_ROBIN          = "rr"
+	WEIGHTED_ROUND_ROBIN = "wrr"
+	LEAST_CONNECTIONS    = "lc"
+	SOURCE_IP_HASH       = "si"
+	LEAST_RESPONSE_TIME  = "lrs"
 )
 
 // run the loadbalancer specified by the input string
@@ -45,7 +45,7 @@ func main() {
 
 	// Command line flag to specify what kind of algorithm to use
 	// Default algorithm is round-robin
-	algo_type := flag.String("type", "0", "type of load balancing algorithm")
+	algo_type := flag.String("type", "rr", "type of load balancing algorithm")
 
 	flag.Parse()
 
