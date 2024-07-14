@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	least_connections "github.com/Turtel216/Golang-Loadbalancer/internal/least-connections"
 	round_robin "github.com/Turtel216/Golang-Loadbalancer/internal/round-robin"
 	source_ip_hash "github.com/Turtel216/Golang-Loadbalancer/internal/source-ip-hash"
 	weighted_round_robin "github.com/Turtel216/Golang-Loadbalancer/internal/weighted-round-robin"
@@ -68,6 +69,30 @@ func run_source_ip_hash(port *string) {
 
 	// Create a new loadbalancer
 	loadbalancer := source_ip_hash.NewLoadBalancer(*port, servers)
+
+	handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
+		loadbalancer.ServeProxy(rw, req)
+	}
+
+	//Reroutes request coming in at the `/` endpoint
+	http.HandleFunc("/", handleRedirect)
+
+	// Starting the server
+	fmt.Printf("Loadbalancer started at port %s \n", loadbalancer.Port)
+	http.ListenAndServe(":"+loadbalancer.Port, nil)
+}
+
+// starts up the least connections loadbalancer
+func run_least_connections(port *string) {
+	// Target servers
+	servers := []least_connections.Server{
+		least_connections.NewSimpleServer("https://www.youtube.com"),
+		least_connections.NewSimpleServer("https://www.facebook.com"),
+		least_connections.NewSimpleServer("https://www.google.com"),
+	}
+
+	// Create a new loadbalancer
+	loadbalancer := least_connections.NewLoadBalancer(*port, servers)
 
 	handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
 		loadbalancer.ServeProxy(rw, req)
