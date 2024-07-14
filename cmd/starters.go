@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	least_connections "github.com/Turtel216/Golang-Loadbalancer/internal/least-connections"
+	least_response_time "github.com/Turtel216/Golang-Loadbalancer/internal/least-response-time"
 	round_robin "github.com/Turtel216/Golang-Loadbalancer/internal/round-robin"
 	source_ip_hash "github.com/Turtel216/Golang-Loadbalancer/internal/source-ip-hash"
 	weighted_round_robin "github.com/Turtel216/Golang-Loadbalancer/internal/weighted-round-robin"
@@ -93,6 +94,30 @@ func run_least_connections(port *string) {
 
 	// Create a new loadbalancer
 	loadbalancer := least_connections.NewLoadBalancer(*port, servers)
+
+	handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
+		loadbalancer.ServeProxy(rw, req)
+	}
+
+	//Reroutes request coming in at the `/` endpoint
+	http.HandleFunc("/", handleRedirect)
+
+	// Starting the server
+	fmt.Printf("Loadbalancer started at port %s \n", loadbalancer.Port)
+	http.ListenAndServe(":"+loadbalancer.Port, nil)
+}
+
+// starts up the least connections loadbalancer
+func run_least_response_time(port *string) {
+	// Target servers
+	servers := []least_response_time.Server{
+		least_response_time.NewSimpleServer("https://www.youtube.com"),
+		least_response_time.NewSimpleServer("https://www.facebook.com"),
+		least_response_time.NewSimpleServer("https://www.google.com"),
+	}
+
+	// Create a new loadbalancer
+	loadbalancer := least_response_time.NewLoadBalancer(*port, servers)
 
 	handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
 		loadbalancer.ServeProxy(rw, req)
