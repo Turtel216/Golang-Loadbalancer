@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	ROUND_ROBIN       = string("round-robin")
-	LEAST_CONNECTIONS = string("least-connections")
+	ROUND_ROBIN       = string("round robin")
+	LEAST_CONNECTIONS = string("least connections")
+	SOURCE_IP_HASH    = string("source ip")
 )
 
 // run the loadbalancer specified by the input string
@@ -18,6 +19,10 @@ func start_loadbalancer(algo_type, port *string) error {
 		run_round_robin(port)
 		return nil
 	case LEAST_CONNECTIONS:
+		run_weighted_round_robin(port)
+		return nil
+	case SOURCE_IP_HASH:
+		run_source_ip_hash(port)
 		return nil
 	default:
 		return fmt.Errorf("%s is not a valid algorithm type", *algo_type)
