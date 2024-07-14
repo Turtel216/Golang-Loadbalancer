@@ -15,7 +15,7 @@
 
 The server can be started by running the following command
 
-    go run ./cmd/main.go 
+    go run ./cmd 
 
 This will start the server at the default port 4000 using the round robin algorithm. You can add the -port flag to specify the port numebr and the -type flag to specify the algorithm type. You can choose from the following list:
 
@@ -27,6 +27,6 @@ This will start the server at the default port 4000 using the round robin algori
 
 i.g.
 
-    go run ./cmd/main.go -port=3000 -type=wrr
+    go run ./cmd -port=3000 -type=wrr
 
 This will start the server at port 3000 using the weighted round robin algorithm

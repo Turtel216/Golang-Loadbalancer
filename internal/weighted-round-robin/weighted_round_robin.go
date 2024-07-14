@@ -12,11 +12,6 @@ import (
 	"sync"
 )
 
-type Server interface {
-	Address() string
-	Serve(rw http.ResponseWriter, req *http.Request)
-}
-
 type SimpleServer struct {
 	addr   string
 	weight int

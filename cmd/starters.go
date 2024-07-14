@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	lb "github.com/Turtel216/Golang-Loadbalancer/internal"
 	least_connections "github.com/Turtel216/Golang-Loadbalancer/internal/least-connections"
 	least_response_time "github.com/Turtel216/Golang-Loadbalancer/internal/least-response-time"
 	round_robin "github.com/Turtel216/Golang-Loadbalancer/internal/round-robin"
@@ -14,7 +15,7 @@ import (
 // starts up the round-robin loadbalancer
 func run_round_robin(port *string) {
 	// Target servers
-	servers := []round_robin.Server{
+	servers := []lb.Server{
 		round_robin.NewSimpleServer("https://www.youtube.com"),
 		round_robin.NewSimpleServer("https://www.facebook.com"),
 		round_robin.NewSimpleServer("https://www.google.com"),
@@ -86,7 +87,7 @@ func run_source_ip_hash(port *string) {
 // starts up the least connections loadbalancer
 func run_least_connections(port *string) {
 	// Target servers
-	servers := []least_connections.Server{
+	servers := []lb.Server{
 		least_connections.NewSimpleServer("https://www.youtube.com"),
 		least_connections.NewSimpleServer("https://www.facebook.com"),
 		least_connections.NewSimpleServer("https://www.google.com"),
@@ -110,7 +111,7 @@ func run_least_connections(port *string) {
 // starts up the least connections loadbalancer
 func run_least_response_time(port *string) {
 	// Target servers
-	servers := []least_response_time.Server{
+	servers := []lb.Server{
 		least_response_time.NewSimpleServer("https://www.youtube.com"),
 		least_response_time.NewSimpleServer("https://www.facebook.com"),
 		least_response_time.NewSimpleServer("https://www.google.com"),

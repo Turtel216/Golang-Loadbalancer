@@ -7,13 +7,9 @@ import (
 	"net/url"
 	"os"
 	"sync"
-)
 
-type Server interface {
-	Address() string
-	IsAlive() bool
-	Serve(rw http.ResponseWriter, req *http.Request)
-}
+	lb "github.com/Turtel216/Golang-Loadbalancer/internal"
+)
 
 type simpleServer struct {
 	addr  string
@@ -39,11 +35,11 @@ type Loadbalancer struct {
 	roundRobinCount int
 
 	mu      sync.Mutex
-	servers []Server //Interface
+	servers []lb.Server //Interface
 }
 
 // Creates a new loadbalancer instance
-func NewLoadBalancer(port string, servers []Server) *Loadbalancer {
+func NewLoadBalancer(port string, servers []lb.Server) *Loadbalancer {
 	return &Loadbalancer{
 		Port:            port,
 		roundRobinCount: 0,
@@ -52,7 +48,7 @@ func NewLoadBalancer(port string, servers []Server) *Loadbalancer {
 }
 
 // Returns the server selected by the round-robin scheduler
-func (loadbalancer *Loadbalancer) getNextAvailableServer() (server Server) {
+func (loadbalancer *Loadbalancer) getNextAvailableServer() (server lb.Server) {
 	loadbalancer.mu.Lock()
 	defer loadbalancer.mu.Unlock()
 

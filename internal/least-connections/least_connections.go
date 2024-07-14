@@ -8,13 +8,9 @@ import (
 	"net/url"
 	"os"
 	"sync"
-)
 
-type Server interface {
-	Address() string
-	IsAlive() bool
-	Serve(rw http.ResponseWriter, req *http.Request)
-}
+	lb "github.com/Turtel216/Golang-Loadbalancer/internal"
+)
 
 type simpleServer struct {
 	addr  string
@@ -37,23 +33,23 @@ func NewSimpleServer(addr string) *simpleServer {
 
 type Loadbalancer struct {
 	Port        string
-	Connections map[Server]int
+	Connections map[lb.Server]int
 
 	mu      sync.Mutex
-	servers []Server //Interface
+	servers []lb.Server //Interface
 }
 
 // Creates a new loadbalancer instance
-func NewLoadBalancer(port string, servers []Server) *Loadbalancer {
+func NewLoadBalancer(port string, servers []lb.Server) *Loadbalancer {
 	return &Loadbalancer{
 		Port:        port,
-		Connections: make(map[Server]int),
+		Connections: make(map[lb.Server]int),
 		servers:     servers,
 	}
 }
 
 // Returns the server with the least connections
-func (loadbalancer *Loadbalancer) getNextAvailableServer() (server Server) {
+func (loadbalancer *Loadbalancer) getNextAvailableServer() (server lb.Server) {
 	loadbalancer.mu.Lock()
 	defer loadbalancer.mu.Unlock()
 
