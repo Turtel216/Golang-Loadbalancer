@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	round_robin "github.com/Turtel216/Golang-Loadbalancer/round-robin"
+	round_robin "github.com/Turtel216/Golang-Loadbalancer/internal/round-robin"
 )
 
 // Tests the usages of a round-robin loadbalancer
@@ -14,6 +14,10 @@ func main() {
 	// Command line flag to specify port number when running go run ./src/main.go
 	// Default value is :4000
 	port := flag.String("port", "4000", "network port")
+
+	// Command line flag to specify what kind of algorithm to use
+	// Default algorithm is round-robin
+	algo_type := flag.String("type", "0", "type of load balancing algorithm")
 
 	flag.Parse()
 
