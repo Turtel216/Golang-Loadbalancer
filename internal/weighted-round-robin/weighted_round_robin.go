@@ -17,21 +17,21 @@ type Server interface {
 	Serve(rw http.ResponseWriter, req *http.Request)
 }
 
-type simpleServer struct {
+type SimpleServer struct {
 	addr   string
 	weight int
 	proxy  *httputil.ReverseProxy
 }
 
 // Creates a new instance of the simpleServer struct
-func NewSimpleServer(addr string, weight int) simpleServer {
+func NewSimpleServer(addr string, weight int) SimpleServer {
 	serverUrl, err := url.Parse(addr)
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
 		os.Exit(1)
 	}
 
-	return simpleServer{
+	return SimpleServer{
 		addr:   addr,
 		weight: weight,
 		proxy:  httputil.NewSingleHostReverseProxy(serverUrl),
@@ -41,17 +41,17 @@ func NewSimpleServer(addr string, weight int) simpleServer {
 type Loadbalancer struct {
 	Port          string
 	mu            sync.Mutex
-	servers       []simpleServer
+	servers       []SimpleServer
 	current       int
 	total_weights int
 }
 
 // Creates and returns a new loadbalancer instance
-func NewLoadBalancer(port string, servers []simpleServer, total_weights int) *Loadbalancer {
+func NewLoadBalancer(port string, servers []SimpleServer) *Loadbalancer {
 	loadbalancer := &Loadbalancer{
 		Port:          port,
 		servers:       servers,
-		total_weights: total_weights,
+		total_weights: 0,
 	}
 
 	for _, server := range servers {
@@ -62,7 +62,7 @@ func NewLoadBalancer(port string, servers []simpleServer, total_weights int) *Lo
 }
 
 // returns the server selected by the weighted round-robin scheduler
-func (loadbalancer *Loadbalancer) getNextAvailableServer() (simpleServer, error) {
+func (loadbalancer *Loadbalancer) getNextAvailableServer() (SimpleServer, error) {
 	loadbalancer.mu.Lock()
 	defer loadbalancer.mu.Unlock()
 
@@ -80,14 +80,14 @@ func (loadbalancer *Loadbalancer) getNextAvailableServer() (simpleServer, error)
 		}
 	}
 
-	return simpleServer{}, errors.New("Couldn't find next avaible server")
+	return SimpleServer{}, errors.New("Couldn't find next avaible server")
 }
 
 // Returns the adress of the simple server instance
-func (s *simpleServer) Address() string { return s.addr }
+func (s *SimpleServer) Address() string { return s.addr }
 
 // Serves the through the reverse proxy
-func (s *simpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
+func (s *SimpleServer) Serve(rw http.ResponseWriter, req *http.Request) {
 	s.proxy.ServeHTTP(rw, req)
 }
 

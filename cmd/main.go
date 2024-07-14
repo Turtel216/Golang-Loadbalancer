@@ -4,22 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
-
-	round_robin "github.com/Turtel216/Golang-Loadbalancer/internal/round-robin"
 )
 
 const (
 	ROUND_ROBIN       = string("round-robin")
 	LEAST_CONNECTIONS = string("least-connections")
 )
-
-// Target servers
-var servers = []round_robin.Server{
-	round_robin.NewSimpleServer("https://www.youtube.com"),
-	round_robin.NewSimpleServer("https://www.facebook.com"),
-	round_robin.NewSimpleServer("https://www.google.com"),
-}
 
 // run the loadbalancer specified by the input string
 func start_loadbalancer(algo_type, port *string) error {
@@ -32,23 +22,6 @@ func start_loadbalancer(algo_type, port *string) error {
 	default:
 		return fmt.Errorf("%s is not a valid algorithm type", *algo_type)
 	}
-}
-
-// starts up the round-robin loadbalancer
-func run_round_robin(port *string) {
-	// Creates a new loadbalancer at port 8000
-	loadbalancer := round_robin.NewLoadBalancer(*port, servers)
-
-	handleRedirect := func(rw http.ResponseWriter, req *http.Request) {
-		loadbalancer.ServeProxy(rw, req)
-	}
-
-	//Reroutes request coming in at the `/` endpoint
-	http.HandleFunc("/", handleRedirect)
-
-	// Starting the server
-	fmt.Printf("Loadbalancer started at port %s \n", loadbalancer.Port)
-	http.ListenAndServe(":"+loadbalancer.Port, nil)
 }
 
 func main() {
