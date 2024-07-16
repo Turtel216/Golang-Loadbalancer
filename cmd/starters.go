@@ -13,12 +13,11 @@ import (
 )
 
 // starts up the round-robin loadbalancer
-func run_round_robin(port *string) {
-	// Target servers
-	servers := []lb.Server{
-		round_robin.NewSimpleServer("https://www.youtube.com"),
-		round_robin.NewSimpleServer("https://www.facebook.com"),
-		round_robin.NewSimpleServer("https://www.google.com"),
+func run_round_robin(port *string, urls []string) {
+	//Initialize target servers
+	var servers []lb.Server
+	for _, url := range urls {
+		servers = append(servers, round_robin.NewSimpleServer(url))
 	}
 
 	// Creates a new loadbalancer at port 8000
@@ -37,7 +36,7 @@ func run_round_robin(port *string) {
 }
 
 // starts up the weighted round-robin loadbalancer
-func run_weighted_round_robin(port *string) {
+func run_weighted_round_robin(port *string, urls []string) {
 	// Target servers
 	servers := []weighted_round_robin.SimpleServer{
 		weighted_round_robin.NewSimpleServer("https://www.youtube.com", 1),
@@ -61,12 +60,11 @@ func run_weighted_round_robin(port *string) {
 }
 
 // starts up the source ip hash loadbalancer
-func run_source_ip_hash(port *string) {
-	// Target servers
-	servers := []source_ip_hash.SimpleServer{
-		source_ip_hash.NewSimpleServer("https://www.youtube.com"),
-		source_ip_hash.NewSimpleServer("https://www.facebook.com"),
-		source_ip_hash.NewSimpleServer("https://www.google.com"),
+func run_source_ip_hash(port *string, urls []string) {
+	//Initialize target servers
+	var servers []source_ip_hash.SimpleServer
+	for _, url := range urls {
+		servers = append(servers, source_ip_hash.NewSimpleServer(url))
 	}
 
 	// Create a new loadbalancer
@@ -85,12 +83,11 @@ func run_source_ip_hash(port *string) {
 }
 
 // starts up the least connections loadbalancer
-func run_least_connections(port *string) {
-	// Target servers
-	servers := []lb.Server{
-		least_connections.NewSimpleServer("https://www.youtube.com"),
-		least_connections.NewSimpleServer("https://www.facebook.com"),
-		least_connections.NewSimpleServer("https://www.google.com"),
+func run_least_connections(port *string, urls []string) {
+	//Initialize target servers
+	var servers []lb.Server
+	for _, url := range urls {
+		servers = append(servers, least_connections.NewSimpleServer(url))
 	}
 
 	// Create a new loadbalancer
@@ -109,12 +106,11 @@ func run_least_connections(port *string) {
 }
 
 // starts up the least connections loadbalancer
-func run_least_response_time(port *string) {
-	// Target servers
-	servers := []lb.Server{
-		least_response_time.NewSimpleServer("https://www.youtube.com"),
-		least_response_time.NewSimpleServer("https://www.facebook.com"),
-		least_response_time.NewSimpleServer("https://www.google.com"),
+func run_least_response_time(port *string, urls []string) {
+	//Initialize target servers
+	var servers []lb.Server
+	for _, url := range urls {
+		servers = append(servers, least_response_time.NewSimpleServer(url))
 	}
 
 	// Create a new loadbalancer

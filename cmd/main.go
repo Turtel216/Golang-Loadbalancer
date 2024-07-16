@@ -15,22 +15,22 @@ const (
 )
 
 // run the loadbalancer specified by the input string
-func start_loadbalancer(algo_type, port *string) error {
+func start_loadbalancer(algo_type, port *string, urls []string) error {
 	switch *algo_type {
 	case ROUND_ROBIN:
-		run_round_robin(port)
+		run_round_robin(port, urls)
 		return nil
 	case WEIGHTED_ROUND_ROBIN:
-		run_weighted_round_robin(port)
+		run_weighted_round_robin(port, urls)
 		return nil
 	case LEAST_CONNECTIONS:
-		run_weighted_round_robin(port)
+		run_weighted_round_robin(port, urls)
 		return nil
 	case SOURCE_IP_HASH:
-		run_source_ip_hash(port)
+		run_source_ip_hash(port, urls)
 		return nil
 	case LEAST_RESPONSE_TIME:
-		run_least_response_time(port)
+		run_least_response_time(port, urls)
 		return nil
 	default:
 		return fmt.Errorf("%s is not a valid algorithm type", *algo_type)
@@ -49,7 +49,12 @@ func main() {
 
 	flag.Parse()
 
-	if err := start_loadbalancer(algo_type, port); err != nil {
+	urls, err := parser_config("loadbalancer.config")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err = start_loadbalancer(algo_type, port, urls); err != nil {
 		log.Fatal(err)
 	}
 }
