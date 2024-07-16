@@ -13,6 +13,8 @@
 
 ## Running the server
 
+#### Before running the server make sure that there is a **loadbalancer.config** file in the project directory. Inside of the .config file type out your target server addresses
+
 The server can be started by running the following command
 
     go run ./cmd 
