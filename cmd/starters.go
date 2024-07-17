@@ -1,8 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"strconv"
+	"strings"
 
 	lb "github.com/Turtel216/Golang-Loadbalancer/internal"
 	least_connections "github.com/Turtel216/Golang-Loadbalancer/internal/least-connections"
@@ -38,10 +43,30 @@ func run_round_robin(port string, urls []string) {
 // starts up the weighted round-robin loadbalancer
 func run_weighted_round_robin(port string, urls []string) {
 	// Target servers
-	servers := []weighted_round_robin.SimpleServer{
-		*weighted_round_robin.NewSimpleServer("https://www.youtube.com", 1),
-		*weighted_round_robin.NewSimpleServer("https://www.facebook.com", 2),
-		*weighted_round_robin.NewSimpleServer("https://www.google.com", 3),
+	var servers []weighted_round_robin.SimpleServer
+	// User input reader for getting server wieghtes
+	reader := bufio.NewReader(os.Stdin)
+
+	//Initialize target servers
+	for _, url := range urls {
+		// Read weight from user
+		fmt.Printf("Please provide the weight for the server with address: %s", url)
+		weight_str, err := reader.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Remove new line character
+		weight_str = strings.Trim(weight_str, "\n")
+
+		// Convert string to number
+		weight_num, err := strconv.Atoi(weight_str)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Initialize server
+		servers = append(servers, *weighted_round_robin.NewSimpleServer(url, weight_num))
 	}
 
 	// Creates a new loadbalancer at port 8000
