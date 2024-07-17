@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"log"
+
+	"github.com/Turtel216/Golang-Loadbalancer/internal/util"
 )
 
 const (
@@ -49,7 +51,7 @@ func main() {
 
 	flag.Parse()
 
-	urls, err := parser_config("loadbalancer.config")
+	urls, err := util.Config_parser("loadbalancer.config")
 	if err != nil {
 		log.Fatal(err)
 	}

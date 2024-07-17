@@ -1,11 +1,11 @@
-package main
+package util
 
 import (
 	"os"
 )
 
 // parse the config file
-func parser_config(path string) ([]string, error) {
+func Config_parser(path string) ([]string, error) {
 	//read from config file
 	_bytes, err := read_config(path)
 	if err != nil {
