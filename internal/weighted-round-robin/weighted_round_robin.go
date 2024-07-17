@@ -19,14 +19,14 @@ type SimpleServer struct {
 }
 
 // Creates a new instance of the simpleServer struct
-func NewSimpleServer(addr string, weight int) SimpleServer {
+func NewSimpleServer(addr string, weight int) *SimpleServer {
 	serverUrl, err := url.Parse(addr)
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
 		os.Exit(1)
 	}
 
-	return SimpleServer{
+	return &SimpleServer{
 		addr:   addr,
 		weight: weight,
 		proxy:  httputil.NewSingleHostReverseProxy(serverUrl),

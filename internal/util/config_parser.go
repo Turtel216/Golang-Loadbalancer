@@ -5,7 +5,7 @@ import (
 )
 
 // parse the config file
-func Config_parser(path *string) (*[]string, error) {
+func Config_parser(path string) (*[]string, error) {
 	//read from config file
 	_bytes, err := read_config(path)
 	if err != nil {
@@ -37,9 +37,9 @@ func Config_parser(path *string) (*[]string, error) {
 }
 
 // Read from the config file
-func read_config(path *string) ([]byte, error) {
+func read_config(path string) ([]byte, error) {
 	//Read from the file
-	buff, err := os.ReadFile(*path)
+	buff, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

@@ -17,8 +17,8 @@ const (
 )
 
 // run the loadbalancer specified by the input string
-func start_loadbalancer(algo_type, port *string, urls *[]string) error {
-	switch *algo_type {
+func start_loadbalancer(algo_type, port string, urls []string) error {
+	switch algo_type {
 	case ROUND_ROBIN:
 		run_round_robin(port, urls)
 		return nil
@@ -35,7 +35,7 @@ func start_loadbalancer(algo_type, port *string, urls *[]string) error {
 		run_least_response_time(port, urls)
 		return nil
 	default:
-		return fmt.Errorf("%s is not a valid algorithm type", *algo_type)
+		return fmt.Errorf("%s is not a valid algorithm type", algo_type)
 	}
 }
 
@@ -52,12 +52,12 @@ func main() {
 	flag.Parse()
 
 	var path string = "loadbalancer.config"
-	urls, err := util.Config_parser(&path)
+	urls, err := util.Config_parser(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err = start_loadbalancer(algo_type, port, urls); err != nil {
+	if err = start_loadbalancer(*algo_type, *port, *urls); err != nil {
 		log.Fatal(err)
 	}
 }
