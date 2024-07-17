@@ -17,7 +17,7 @@ const (
 )
 
 // run the loadbalancer specified by the input string
-func start_loadbalancer(algo_type, port *string, urls []string) error {
+func start_loadbalancer(algo_type, port *string, urls *[]string) error {
 	switch *algo_type {
 	case ROUND_ROBIN:
 		run_round_robin(port, urls)
@@ -51,7 +51,8 @@ func main() {
 
 	flag.Parse()
 
-	urls, err := util.Config_parser("loadbalancer.config")
+	var path string = "loadbalancer.config"
+	urls, err := util.Config_parser(&path)
 	if err != nil {
 		log.Fatal(err)
 	}
