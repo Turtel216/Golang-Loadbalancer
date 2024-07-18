@@ -50,7 +50,7 @@ func run_weighted_round_robin(port string, urls []string) {
 	//Initialize target servers
 	for _, url := range urls {
 		// Read weight from user
-		fmt.Printf("Please provide the weight for the server with address: %s", url)
+		fmt.Printf("Please provide the weight for the server with address: %s\n", url)
 		weight_str, err := reader.ReadString('\n')
 		if err != nil {
 			log.Fatal(err)

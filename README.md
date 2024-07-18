@@ -9,7 +9,6 @@
 - Source ip hash
 - Least connections
 - Least Response Time(currently being worked on)
-- **More to be added soon!**
 
 ## Running the server
 

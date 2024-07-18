@@ -23,7 +23,7 @@ func Config_parser(path string) (*[]string, error) {
 	//iterate over string
 	for _, _char := range conf_str {
 		// add url to struct
-		if _char == '\n' {
+		if _char == '\n' || _char == ' ' || _char == '\t' {
 			config = append(config, url)
 			url = ""
 			continue
